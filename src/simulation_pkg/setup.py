@@ -18,6 +18,7 @@ setup(
         (os.path.join('share', package_name,'launch'), glob('launch/*')),
         (os.path.join('share', package_name,'worlds'), glob('worlds/*')),
         (os.path.join('share', package_name,'rviz'), glob('rviz/*')),
+        (os.path.join('share', package_name, 'models', 'cle53'), glob('models/cle53/*')),
     ],
     
     install_requires=['setuptools'],

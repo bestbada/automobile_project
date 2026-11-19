@@ -30,7 +30,7 @@ class SendSignal():
   
   def map_to_steer(self, input_value):
 
-    max_steer = 0.6458  # 바퀴 최대 회전 각도 (rad)
+    max_steer = 0.45  # 바퀴 최대 회전 각도 (rad)
     max_steering_angle = 7.85  # 핸들 최대 회전 각도 (deg)
     input_min = -7
     input_max = 7

@@ -27,6 +27,12 @@ class MotionPlanningNode(Node):
         
         self.timer_period = self.declare_parameter('timer', TIMER).value
 
+        # 비례 조향 설정 (원본은 기울기 부호만 보는 ±7 bang-bang)
+        # steering_gain: 경로 기울기(도, DMFL 반환값) 1도당 조향 명령값. 0.3이면 약 23도에서 최대 조향 7
+        # speed: 좌/우 속도 명령(0~255). 원본 고정값 100 유지, 차량에 맞춰 실행 인자로 조정
+        self.steering_gain = self.declare_parameter('steering_gain', 0.3).value
+        self.speed = self.declare_parameter('speed', 100).value
+
         # QoS 설정
         self.qos_profile = QoSProfile(
             reliability=QoSReliabilityPolicy.RELIABLE,
@@ -62,16 +68,13 @@ class MotionPlanningNode(Node):
         else:
             target_slope = DMFL.calculate_slope_between_points(self.path_data[-10], self.path_data[-1])
             
-            if target_slope > 0:
-                self.steering_command =  7 # 예시 조향 값 (7이 최대 조향) 
-            elif target_slope < 0:
-                self.steering_command =  -7
-            else:
-                self.steering_command = 0
+            # 원본(bang-bang): 기울기 > 0 이면 7, < 0 이면 -7, 0 이면 0
+            # 비례 조향: 기울기에 비례해 조향하고 ±7(최대 조향)로 제한.
+            # 작은 편차에도 최대 조향하던 원본은 회전 반경이 작은 CLE53(축간 0.59m)에서 바로 차로를 이탈함
+            self.steering_command = int(max(-7, min(7, round(self.steering_gain * target_slope))))
 
-
-        self.left_speed_command = 100  # 예시 속도 값 (255가 최대 속도)
-        self.right_speed_command = 100  # 예시 속도 값 (255가 최대 속도)
+        self.left_speed_command = self.speed   # 속도 (255가 최대 속도)
+        self.right_speed_command = self.speed
 
 
 

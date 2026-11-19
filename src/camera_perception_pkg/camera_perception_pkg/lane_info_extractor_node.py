@@ -57,7 +57,10 @@ class Yolov8InfoExtractor(Node):
 
         (h, w) = (lane2_edge_image.shape[0], lane2_edge_image.shape[1]) #(480, 640)
         dst_mat = [[round(w * 0.3), round(h * 0.0)], [round(w * 0.7), round(h * 0.0)], [round(w * 0.7), h], [round(w * 0.3), h]]
-        src_mat = [[238, 316],[402, 313], [501, 476], [155, 476]]
+        # src_mat = [[238, 316],[402, 313], [501, 476], [155, 476]]  # 원본: Prius 카메라(640x480) 기준
+        # CLE53 전방 카메라(1024x576, 높이 0.595m, 15.2° 숙임, hfov 70.4°) 기준으로 재보정.
+        # 차로 중앙에서 양쪽 차선(±0.433m)을 지면 거리 2.5m(윗변)/0.85m(아랫변)로 투영한 사다리꼴
+        src_mat = [[390, 265], [634, 265], [834, 550], [190, 550]]
         
         lane2_bird_image = CPFL.bird_convert(lane2_edge_image, srcmat=src_mat, dstmat=dst_mat)
         roi_image = CPFL.roi_rectangle_below(lane2_bird_image, cutting_idx=300)
@@ -84,7 +87,7 @@ class Yolov8InfoExtractor(Node):
         target_points = []
         for target_point_y in range(5, 155, 50):  # 예시로 5에서 155까지 50씩 증가
             target_point_x = CPFL.get_lane_center(roi_image, detection_height=target_point_y, 
-                                                detection_thickness=10, road_gradient=grad, lane_width=300)
+                                                detection_thickness=10, road_gradient=grad, lane_width=410)  # 원본 300(640 기준). BEV에서 차로 폭 = 0.4*1024 ≈ 410px
             
             target_point = TargetPoint()
             target_point.target_x = round(target_point_x)

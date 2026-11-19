@@ -1,0 +1,19 @@
+material TrackReal
+{
+  receive_shadows on
+  technique
+  {
+    pass
+    {
+      ambient 0.666 0.666 0.666 1.0
+      diffuse 1.11 1.11 1.11 1.0
+      specular 0.15 0.15 0.15 1.0 10
+      texture_unit
+      {
+        texture track_real.jpg
+        filtering anisotropic
+        max_anisotropy 16
+      }
+    }
+  }
+}

@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<sdf version="1.6">
+  <model name="race_track_real">
+    <static>true</static>
+    <link name="link">
+      <collision name="collision">
+        <pose>0 0 0.0 0 0 0</pose>
+        <geometry><plane><normal>0 0 1</normal><size>15.38 11.564</size></plane></geometry>
+        <surface><friction><ode><mu>1.0</mu><mu2>1.0</mu2></ode></friction></surface>
+      </collision>
+      <visual name="visual">
+        <pose>0 0 0.0 0 0 0</pose>
+        <cast_shadows>false</cast_shadows>
+        <geometry><plane><normal>0 0 1</normal><size>15.38 11.564</size></plane></geometry>
+        <material><script>
+          <uri>model://race_track_real/materials/scripts</uri>
+          <uri>model://race_track_real/materials/textures</uri>
+          <name>TrackReal</name>
+        </script></material>
+      </visual>
+    </link>
+  </model>
+</sdf>

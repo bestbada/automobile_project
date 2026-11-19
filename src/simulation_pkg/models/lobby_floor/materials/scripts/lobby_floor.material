@@ -1,0 +1,19 @@
+material LobbyFloor
+{
+  receive_shadows on
+  technique
+  {
+    pass
+    {
+      ambient 0.6 0.6 0.6 1.0
+      diffuse 1.0 1.0 1.0 1.0
+      specular 0.6 0.6 0.6 1.0 40
+      texture_unit
+      {
+        texture lobby_floor.jpg
+        filtering anisotropic
+        max_anisotropy 16
+      }
+    }
+  }
+}
