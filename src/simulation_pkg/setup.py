@@ -19,6 +19,7 @@ setup(
         (os.path.join('share', package_name,'worlds'), glob('worlds/*')),
         (os.path.join('share', package_name,'rviz'), glob('rviz/*')),
         (os.path.join('share', package_name, 'models', 'cle53'), glob('models/cle53/*')),
+        (os.path.join('share', package_name, 'data'), ['simulation_pkg/data/sim.pt']),  # yolov8_node 기본 모델
     ],
     
     install_requires=['setuptools'],

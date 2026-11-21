@@ -1,6 +1,6 @@
 # 궤적 CSV를 트랙 텍스처 위에 그림. 월드→모델: 트랙이 yaw 1.57 회전 → mx=wy, my=-wx
-import sys, csv, matplotlib; matplotlib.use('Agg'); import matplotlib.pyplot as plt
-img = plt.imread('/home/lee/automobile_project/src/simulation_pkg/models/race_track_real/materials/textures/track_real.jpg')
+import os, sys, csv, matplotlib; matplotlib.use('Agg'); import matplotlib.pyplot as plt
+img = plt.imread(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../src/simulation_pkg/models/race_track_real/materials/textures/track_real.jpg'))
 W, H = 15.38, 11.564
 plt.figure(figsize=(12, 9)); plt.imshow(img, extent=[-W/2, W/2, -H/2, H/2])
 for f in sys.argv[2:]:

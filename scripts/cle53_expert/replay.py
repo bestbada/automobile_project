@@ -1,9 +1,9 @@
 # 저장 프레임으로 lane_info_extractor 파이프라인 오프라인 재현
-import sys, cv2, numpy as np
+import os, sys, cv2, numpy as np
 from types import SimpleNamespace as NS
 from ultralytics import YOLO
 from camera_perception_pkg.lib import camera_perception_func_lib as C
-m = YOLO('/home/lee/automobile_project/src/simulation_pkg/simulation_pkg/data/sim.pt')
+m = YOLO(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../src/simulation_pkg/simulation_pkg/data/sim.pt'))
 SRC = [[390, 265], [634, 265], [834, 550], [190, 550]]
 
 def run(img, save=None):

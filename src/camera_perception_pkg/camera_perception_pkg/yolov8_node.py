@@ -14,7 +14,9 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+import os
 from typing import List, Dict
+from ament_index_python.packages import get_package_share_directory
 
 import rclpy
 from rclpy.qos import QoSProfile
@@ -54,7 +56,7 @@ class Yolov8Node(LifecycleNode):
         #---------------Variable Setting---------------
         # 딥러닝 모델 pt 파일명 작성
         #self.declare_parameter("model", "yolov8m.pt")
-        self.declare_parameter("model", "/home/lee/ros2_autonomous_vehicle_simulation/src/simulation_pkg/simulation_pkg/data/sim.pt")
+        self.declare_parameter("model", os.path.join(get_package_share_directory('simulation_pkg'), 'data', 'sim.pt'))
         
         # 추론 하드웨어 선택 (cpu / gpu) 
         self.declare_parameter("device", "cpu")

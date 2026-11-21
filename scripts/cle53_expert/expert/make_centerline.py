@@ -1,6 +1,7 @@
 # 트랙 텍스처에서 2차선(바깥 차선) 중심선 추출 → 월드 좌표 폴리라인(반시계 순서) lane2_center.npy
-import cv2, numpy as np
-TEX = '/home/lee/automobile_project/src/simulation_pkg/models/race_track_real/materials/textures/track_real.jpg'
+import os, cv2, numpy as np
+HERE = os.path.dirname(os.path.abspath(__file__))
+TEX = os.path.join(HERE, '../../../src/simulation_pkg/models/race_track_real/materials/textures/track_real.jpg')
 W, H = 15.38, 11.564          # 평면 크기(m), 모델 yaw 1.57 → wx=-my, wy=mx
 OFFSET = 0.435                # 바깥 실선 중심 → 2차선 중심(텍스처 실측: -6.935 → -6.50)
 img = cv2.imread(TEX, 0); h, w = img.shape; s = w / W   # px/m
@@ -19,7 +20,7 @@ pts = np.stack([-my, mx], 1)                               # 월드 좌표
 seg = np.r_[0, np.cumsum(np.hypot(*np.diff(pts, axis=0).T))]
 u = np.arange(0, seg[-1], 0.05); pts = np.stack([np.interp(u, seg, pts[:, 0]), np.interp(u, seg, pts[:, 1])], 1)
 if 0.5 * np.sum(pts[:, 0] * np.roll(pts[:, 1], -1) - np.roll(pts[:, 0], -1) * pts[:, 1]) < 0: pts = pts[::-1]
-np.save('lane2_center.npy', pts)
+np.save(os.path.join(HERE, 'lane2_center.npy'), pts)
 # 자체 점검: 스폰(-1.03,-6.49)은 2차선 중앙이어야 함
 dmin = np.min(np.hypot(pts[:, 0] + 1.03, pts[:, 1] + 6.49))
 print('length %.2fm, points %d, spawn->centerline %.3fm' % (seg[-1], len(pts), dmin)); assert dmin < 0.08
