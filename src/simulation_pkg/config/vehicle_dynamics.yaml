@@ -7,19 +7,21 @@ simulation_sender_node:
     # --- 공통 ---
     cmd_delay: 0.0        # 명령 전달 지연(s): 노트북→Arduino→모터. 명령 시각 vs 엔코더 반응 시각
     speed_table_cmd: [-255.0, 0.0, 255.0]   # 속도 명령(PWM). 데드존은 표로: 예 [0, 40, 255] → [0, 0, v]
-    speed_table_mps: [-5.0, 0.0, 5.0]       # 무부하 바퀴 둘레 속도(m/s): 바퀴를 들고 엔코더로 측정
-    motor_tau: 0.0        # 무부하 모터 시상수(s): 바퀴 든 상태 계단 응답 63% 시간. slip_enable이면 0.15 [추정]
-    steer_rate: 0.0       # 조향 속도 한계(rad/s), 0 = 즉시. 가변저항 ADC 계단 응답
-    understeer_k: 0.0     # 언더스티어 계수(s²/m²): 곡률 = tanδ/L / (1 + k v²). IMU 요레이트 vs v·tanδ/L
+    speed_table_mps: [-5.0, 0.0, 5.0]       # 무부하 바퀴 둘레 속도(m/s): 차 뒤를 들고 뒷바퀴 엔코더로 측정(좌우 평균)
+    motor_tau: 0.0        # 무부하 모터 시상수(s): 차 뒤를 든 상태 계단 응답 63% 시간. slip_enable이면 0.15 [추정]
+    steer_rate: 0.0       # 조향 속도 한계(rad/s), 0 = 즉시. 앞 조향 모터의 가변저항 ADC 계단 응답
+    understeer_k: 0.0     # 언더스티어 계수(s²/m²), slip_enable=false 일 때만: 곡률 = tanδ/L / (1 + k v²). 슬립 모드는 동적 모델이 대신함
     wheelbase: 0.59       # 축간거리(m)
     com_x: 0.3            # 뒷바퀴 축 → 무게중심 거리(m), model.sdf inertial과 같게
     # --- 슬립(모든 종·횡 슬립) ---
     slip_enable: false
     mass: 27.62           # 총질량(kg) [model.sdf 값, 저울 실측 필요]
-    drive_frac: 0.5       # 구동륜(뒤) 하중 비율 [추정, 앞뒤 저울]
+    drive_frac: 0.5       # 구동륜(뒷바퀴 2개, 각각 모터) 하중 비율 [추정, 앞뒤 저울]
     drive_force_max: 138.0 # 최대 PWM 정지 상태 구동력(N) [추정, 용수철저울 당김 또는 보정 맞춤]
     mu_peak: 0.6          # 최대 종방향 접지계수 [추정]
     s_peak: 0.15          # 그때 슬립률 [추정]
     mu_slide: 0.08        # 완전 헛돌 때 접지계수 [추정] — 최대 PWM 출발 1.5초 헛돎(관찰)에 맞춘 값
     c_rr: 0.03            # 구름저항 계수 [추정, 천 매트 위 관성 주행 감속도 / g]
     mu_lat: 0.6           # 횡 접지계수 [추정, 원 선회 속도 올리며 IMU 횡가속도 한계 / g]
+    alpha_peak: 0.1       # 횡력이 최대가 되는 슬립각(rad) [추정, 원 선회 시 IMU 횡가속도 vs 조향·요레이트로 맞춤]
+    yaw_inertia: 2.4      # 요 관성모멘트(kg·m²) [추정 ≈ 질량×앞축거리×뒷축거리, 스텝 조향 시 IMU 요레이트 응답으로 맞춤]
