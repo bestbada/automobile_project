@@ -13,11 +13,14 @@ simulation_sender_node:
     understeer_k: 0.0     # 언더스티어 계수(s²/m²), slip_enable=false 일 때만: 곡률 = tanδ/L / (1 + k v²). 슬립 모드는 동적 모델이 대신함
     wheelbase: 0.59       # 축간거리(m)
     com_x: 0.3            # 뒷바퀴 축 → 무게중심 거리(m), model.sdf inertial과 같게
+    track: 0.44           # 뒷바퀴 좌우 간격(m) [model.sdf 값, 줄자 실측]
+    cg_h: 0.25            # 무게중심 높이(m) [model.sdf 값, 실측: 한쪽 들어 기울인 뒤 저울 변화로 계산]
     # --- 슬립(모든 종·횡 슬립) ---
     slip_enable: false
+    brake_mode: coast     # coast: PWM 0이면 굴러가다 섬(실차 확인 11-22) / brake: 모터가 감속도 함
     mass: 27.62           # 총질량(kg) [model.sdf 값, 저울 실측 필요]
     drive_frac: 0.5       # 구동륜(뒷바퀴 2개, 각각 모터) 하중 비율 [추정, 앞뒤 저울]
-    drive_force_max: 138.0 # 최대 PWM 정지 상태 구동력(N) [추정, 용수철저울 당김 또는 보정 맞춤]
+    drive_force_max: 138.0 # 최대 PWM 정지 상태 구동력(N, 뒷바퀴 2개 합) [추정, 용수철저울 당김 또는 보정 맞춤]
     mu_peak: 0.6          # 최대 종방향 접지계수 [추정]
     s_peak: 0.15          # 그때 슬립률 [추정]
     mu_slide: 0.08        # 완전 헛돌 때 접지계수 [추정] — 최대 PWM 출발 1.5초 헛돎(관찰)에 맞춘 값
@@ -25,3 +28,6 @@ simulation_sender_node:
     mu_lat: 0.6           # 횡 접지계수 [추정, 원 선회 속도 올리며 IMU 횡가속도 한계 / g]
     alpha_peak: 0.1       # 횡력이 최대가 되는 슬립각(rad) [추정, 원 선회 시 IMU 횡가속도 vs 조향·요레이트로 맞춤]
     yaw_inertia: 2.4      # 요 관성모멘트(kg·m²) [추정 ≈ 질량×앞축거리×뒷축거리, 스텝 조향 시 IMU 요레이트 응답으로 맞춤]
+    # --- 바닥 위치별 마찰(모든 mu에 곱함) ---
+    mu_scale: 1.0         # 전체 배율
+    mu_patches: [0.0]     # [x, y, 반지름, 배율] 반복(월드 좌표 m). [0.0] = 없음. 랜덤: scripts/cle53_expert/set_floor.py
