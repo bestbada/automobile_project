@@ -1552,6 +1552,30 @@
         </visual>
       </link>
     </model>
+    <!-- 창문 햇빛 조각: 바닥 위 밝은 반투명 판(조명 spot은 이 바닥에 안 비쳐서 대체). 기본은 바닥 아래 숨김,
+         scripts/cle53_expert/set_light.py --random 이 에피소드마다 위치·크기·방향·밝기 설정 -->
+    <model name="sun_patch_0"><static>true</static><pose>0 0 -5 0 0 0</pose>
+      <link name="link"><visual name="visual"><cast_shadows>false</cast_shadows><transparency>0.5</transparency>
+        <geometry><box><size>1 1 0.001</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><emissive>1 0.97 0.9 1</emissive></material>
+      </visual></link>
+    </model>
+    <!-- 창문 햇빛 조각: 바닥 위 밝은 반투명 판(조명 spot은 이 바닥에 안 비쳐서 대체). 기본은 바닥 아래 숨김,
+         scripts/cle53_expert/set_light.py --random 이 에피소드마다 위치·크기·방향·밝기 설정 -->
+    <model name="sun_patch_1"><static>true</static><pose>0 0 -5 0 0 0</pose>
+      <link name="link"><visual name="visual"><cast_shadows>false</cast_shadows><transparency>0.5</transparency>
+        <geometry><box><size>1 1 0.001</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><emissive>1 0.97 0.9 1</emissive></material>
+      </visual></link>
+    </model>
+    <!-- 창문 햇빛 조각: 바닥 위 밝은 반투명 판(조명 spot은 이 바닥에 안 비쳐서 대체). 기본은 바닥 아래 숨김,
+         scripts/cle53_expert/set_light.py --random 이 에피소드마다 위치·크기·방향·밝기 설정 -->
+    <model name="sun_patch_2"><static>true</static><pose>0 0 -5 0 0 0</pose>
+      <link name="link"><visual name="visual"><cast_shadows>false</cast_shadows><transparency>0.5</transparency>
+        <geometry><box><size>1 1 0.001</size></box></geometry>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><emissive>1 0.97 0.9 1</emissive></material>
+      </visual></link>
+    </model>
     <light name="sun_light" type="directional">
       <cast_shadows>false</cast_shadows>
       <pose>0 0 20 0 0 0</pose>
