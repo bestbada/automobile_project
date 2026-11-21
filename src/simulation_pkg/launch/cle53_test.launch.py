@@ -27,14 +27,18 @@ def launch_setup(context):
     model_file = os.path.join(share, 'models', 'cle53', 'model.sdf')
 
     return [
-        ExecuteProcess(cmd=['gazebo', '--verbose', world_file, '-s', 'libgazebo_ros_factory.so'], output='screen'),
+        # gazebo_ros_init: /clock 발행 → sender의 지연·모터 모델이 시뮬 시간으로 돈다(실시간보다 느려도 실차와 같은 시간 척도)
+        ExecuteProcess(cmd=['gazebo', '--verbose', world_file, '-s', 'libgazebo_ros_init.so', '-s', 'libgazebo_ros_factory.so',
+                            '--ros-args', '--params-file', os.path.join(share, 'config', 'gazebo_params.yaml')],  # /clock 100Hz (-p는 gazebo 로그재생 옵션과 겹침)
+                       output='screen'),
         TimerAction(period=5.0, actions=[
             Node(package='gazebo_ros', executable='spawn_entity.py', output='screen',
                  arguments=['-file', model_file, '-entity', 'ego_vehicle',
                             '-x', str(SPAWN['x']), '-y', str(SPAWN['y']), '-z', str(SPAWN['z']),
                             '-Y', str(SPAWN['yaw'])]),
         ]),
-        Node(package='simulation_pkg', executable='sim_simulation_sender_node', output='screen'),
+        Node(package='simulation_pkg', executable='sim_simulation_sender_node', output='screen',
+             parameters=[os.path.join(share, 'config', 'vehicle_dynamics.yaml'), {'use_sim_time': True}]),
         # 시뮬 전용: Gazebo camera/image_sim → 역광·자동노출 → camera/image_raw(실차 카메라와 같은 토픽)
         Node(package='simulation_pkg', executable='camera_sim_node', output='screen', parameters=[sun_params(world_file)]),
     ] + viewer(context)

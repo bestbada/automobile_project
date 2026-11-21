@@ -73,7 +73,7 @@
       <collision name="front_left_wheel_collision">
         <pose>0 0 0 1.5708 0 0</pose>
         <geometry><cylinder><radius>0.095</radius><length>0.005</length></cylinder></geometry>
-        <surface><friction><ode><mu>0.14</mu><mu2>0.8</mu2><fdir1>0 0 1</fdir1><slip1>0</slip1><slip2>0</slip2></ode></friction>
+        <surface><friction><ode><mu>0</mu><mu2>0</mu2></ode></friction>
             <contact><ode><kp>1e6</kp><kd>100</kd><min_depth>0.001</min_depth><max_vel>0.1</max_vel></ode></contact></surface>
       </collision>
       <visual name="front_left_wheel_visual">
@@ -93,7 +93,7 @@
       <collision name="front_right_wheel_collision">
         <pose>0 0 0 1.5708 0 0</pose>
         <geometry><cylinder><radius>0.095</radius><length>0.005</length></cylinder></geometry>
-        <surface><friction><ode><mu>0.14</mu><mu2>0.8</mu2><fdir1>0 0 1</fdir1><slip1>0</slip1><slip2>0</slip2></ode></friction>
+        <surface><friction><ode><mu>0</mu><mu2>0</mu2></ode></friction>
             <contact><ode><kp>1e6</kp><kd>100</kd><min_depth>0.001</min_depth><max_vel>0.1</max_vel></ode></contact></surface>
       </collision>
       <visual name="front_right_wheel_visual">
@@ -113,7 +113,7 @@
       <collision name="rear_left_wheel_collision">
         <pose>0 0 0 1.5708 0 0</pose>
         <geometry><cylinder><radius>0.095</radius><length>0.005</length></cylinder></geometry>
-        <surface><friction><ode><mu>0.8</mu><mu2>0.25</mu2><fdir1>0 0 1</fdir1><slip1>0</slip1><slip2>0.05</slip2></ode></friction>
+        <surface><friction><ode><mu>0</mu><mu2>0</mu2></ode></friction>
             <contact><ode><kp>1e6</kp><kd>100</kd><min_depth>0.001</min_depth><max_vel>0.1</max_vel></ode></contact></surface>
       </collision>
       <visual name="rear_left_wheel_visual">
@@ -133,7 +133,7 @@
       <collision name="rear_right_wheel_collision">
         <pose>0 0 0 1.5708 0 0</pose>
         <geometry><cylinder><radius>0.095</radius><length>0.005</length></cylinder></geometry>
-        <surface><friction><ode><mu>0.8</mu><mu2>0.25</mu2><fdir1>0 0 1</fdir1><slip1>0</slip1><slip2>0.05</slip2></ode></friction>
+        <surface><friction><ode><mu>0</mu><mu2>0</mu2></ode></friction>
             <contact><ode><kp>1e6</kp><kd>100</kd><min_depth>0.001</min_depth><max_vel>0.1</max_vel></ode></contact></surface>
       </collision>
       <visual name="rear_right_wheel_visual">
@@ -402,28 +402,14 @@
       </sensor>
     </link>
     <joint name="us_rear_right_link_joint" type="fixed"><parent>chassis</parent><child>us_rear_right_link</child></joint>
-    <plugin name="cle53_ackermann_drive" filename="libgazebo_ros_ackermann_drive.so">
-      <update_rate>100.0</update_rate>
-      <front_left_joint>front_left_combined_joint</front_left_joint>
-      <front_right_joint>front_right_combined_joint</front_right_joint>
-      <rear_left_joint>rear_left_wheel_joint</rear_left_joint>
-      <rear_right_joint>rear_right_wheel_joint</rear_right_joint>
-      <left_steering_joint>front_left_combined_joint</left_steering_joint>
-      <right_steering_joint>front_right_combined_joint</right_steering_joint>
-      <steering_wheel_joint>steering_joint</steering_wheel_joint>
-      <max_steer>0.45</max_steer>
-      <max_steering_angle>7.85</max_steering_angle>
-      <max_speed>3</max_speed>
-      <left_steering_pid_gain>40 0 1</left_steering_pid_gain>
-      <left_steering_i_range>0 0</left_steering_i_range>
-      <right_steering_pid_gain>40 0 1</right_steering_pid_gain>
-      <right_steering_i_range>0 0</right_steering_i_range>
-      <linear_velocity_pid_gain>5 0 0</linear_velocity_pid_gain>
-      <linear_velocity_i_range>0 0</linear_velocity_i_range>
+    <!-- 바퀴 충돌면 마찰 0: 바퀴는 차체를 받치기만 하고 타이어 힘(슬립)은 sender 모델이 계산(마찰이 있으면 속도가 약 23% 끌림). -->
+    <!-- 구동: 차체 속도·요레이트를 그대로 적용(planar_move). 바퀴 슬립·모터·조향 지연은 simulation_sender_node 모델이 계산.
+         (이전 ackermann 플러그인은 P제어라 약 1초 지연·정상상태 오차가 숨어 있어 실측 보정을 방해 → 교체) -->
+    <plugin name="cle53_planar_move" filename="libgazebo_ros_planar_move.so">
+      <update_rate>0</update_rate>  <!-- 0 = 물리 스텝마다 속도 지정. 100Hz면 사이 스텝에 바퀴 접촉 마찰이 차를 끌고 밀어 속도가 흔들림 -->
+      <publish_rate>30</publish_rate>
       <publish_odom>true</publish_odom>
       <publish_odom_tf>true</publish_odom_tf>
-      <publish_wheel_tf>false</publish_wheel_tf>
-      <publish_distance>true</publish_distance>
       <odometry_frame>odom</odometry_frame>
       <robot_base_frame>chassis</robot_base_frame>
     </plugin>

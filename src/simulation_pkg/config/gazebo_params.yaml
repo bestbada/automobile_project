@@ -1,0 +1,4 @@
+# gazebo_ros_init(노드 이름 gazebo): /clock 100Hz. 기본 10Hz면 시뮬 시간으로 도는 sender가 10Hz로만 갱신됨
+gazebo:
+  ros__parameters:
+    publish_rate: 100.0
