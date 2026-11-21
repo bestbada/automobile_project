@@ -1,0 +1,11 @@
+# 기준 PC: Ubuntu 22.04.5 / ROS 2 Humble / Gazebo 11.10.2 / Python 3.10 / RTX 3060 Ti, NVIDIA 드라이버 580(CUDA 13.0)
+# 설치: pip install -r requirements.txt   (scipy 1.8.0, matplotlib 3.5.1은 apt python3-scipy/python3-matplotlib, install.sh에서 설치)
+--extra-index-url https://download.pytorch.org/whl/cu130
+torch==2.12.1
+torchvision==0.27.1
+numpy==1.26.4
+opencv-python==4.11.0.86
+ultralytics==8.2.69
+setuptools==58.2.0
+pyserial==3.5
+pynput==1.8.2

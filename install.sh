@@ -9,6 +9,8 @@ pip install opencv-python pyserial
 pip install ultralytics==8.2.69
 pip install setuptools==58.2.0 
 pip install pynput
+sudo apt install -y python3-scipy python3-matplotlib
+pip install -r "$(dirname "$0")/requirements.txt"   # 팀 기준 버전 고정
 
 sudo apt install gazebo
 sudo apt install ros-humble-gazebo-ros-pkgs
