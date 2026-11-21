@@ -3,6 +3,10 @@
 Gazebo 자체 토픽 ~/light/modify(msgs::Light)를 gz topic -p 로 발행하므로 추가 플러그인 불필요.
 조명 이름: sun_light(directional, 전역 햇빛), ceiling_0..15(point, 천장등). 창문 햇빛 조각은 모델 sun_patch_0..2(set_patch)
 
+노출: 월드는 실제 조명의 EXPOSURE_K배로 렌더링(포화 방지, camera_sim_node가 자동노출로 복원).
+      --sun/--random 세기는 실제 기준(0~1)이고 여기서 K를 곱함. --diffuse 등 직접 값은 그대로 전달(이미 K 반영한 값으로 줄 것)
+      sun_light를 바꾸면 camera_sim_node의 역광 파라미터(sun_dir, sun_diffuse)도 같이 갱신
+
 CLI 예: set_light.py sun_light --dir -0.8 -0.35 -0.48 --diffuse 0.9 0.9 0.85
         set_light.py ceiling_0 ceiling_1 --diffuse 0.3 0.3 0.3 --att 0.6 0.05 0.01
         set_light.py sun_light --sun 30 120 0.8    # 고도(도), 방위(도, +x에서 반시계), 세기(0~1)
@@ -11,6 +15,7 @@ Python: from set_light import apply_random_sun; info = apply_random_sun(random.R
 import argparse, math, random, subprocess
 
 # 랜덤 햇빛 범위(창문 위치 미상 → 방위 전체). 대회장 정보 생기면 좁힐 것
+EXPOSURE_K = 0.35   # 월드 파일 주석 EXPOSURE_K와 같은 값
 ELEV, AZIM, INTENSITY = (10, 60), (0, 360), (0.3, 1.0)        # sun_light(전역 햇빛)
 # 창문 햇빛 조각(월드의 sun_patch_0..2 반투명 판): 최대 개수, 폭 m, 불투명도(밝기), 중심 범위(월드 좌표, 트랙)
 N_PATCH, PATCH_W, PATCH_OPACITY = 3, (0.4, 1.5), (0.2, 0.85)
@@ -21,7 +26,7 @@ def sun(elev_deg, azim_deg, intensity, color=(1.0, 0.97, 0.9)):
     """고도·방위·세기 → set_light 인자. direction은 빛이 '향하는' 방향(아래쪽 -z)"""
     e, a = math.radians(elev_deg), math.radians(azim_deg)
     return dict(direction=(-math.cos(e) * math.cos(a), -math.cos(e) * math.sin(a), -math.sin(e)),
-                diffuse=tuple(c * intensity for c in color))
+                diffuse=tuple(c * intensity * EXPOSURE_K for c in color))
 
 
 def random_sun(rng=random):
@@ -85,6 +90,12 @@ assert all(p is None or p['l'] <= PATCH_MAX_LEN for s_ in range(20) for p in ran
 def set_light(name, world='default', **kw):
     subprocess.run(['gz', 'topic', '-w', world, '-p', f'/gazebo/{world}/light/modify', '-m', light_msg(name, **kw)],
                    check=True, timeout=10)
+    if name == 'sun_light':   # 역광 후처리 노드에 햇빛 알림(노드 없으면 무시)
+        for k in ('direction', 'diffuse'):
+            if kw.get(k) is not None:
+                v = '[' + ', '.join(f'{float(x):.4f}' for x in kw[k]) + ']'
+                subprocess.run(['ros2', 'param', 'set', '/camera_sim_node', 'sun_dir' if k == 'direction' else 'sun_diffuse', v],
+                               capture_output=True, timeout=15)
 
 
 def main():

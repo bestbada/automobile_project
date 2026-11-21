@@ -180,9 +180,12 @@
           <horizontal_fov>1.2292</horizontal_fov>
           <image><width>1024</width><height>576</height><format>R8G8B8</format></image>
           <clip><near>0.02</near><far>50</far></clip>
-          <noise><type>gaussian</type><mean>0</mean><stddev>0.007</stddev></noise>
+          <!-- 잡음은 렌더(EXPOSURE_K 0.35배) 단계에 들어가 자동노출 이득으로 커짐 → 0.007×0.35 -->
+          <noise><type>gaussian</type><mean>0</mean><stddev>0.0025</stddev></noise>
         </camera>
         <plugin name="camera_driver" filename="libgazebo_ros_camera.so">
+          <!-- 시뮬 전용 원본 토픽. camera_sim_node(자동노출·역광)가 실차와 같은 camera/image_raw로 발행 -->
+          <ros><remapping>camera/image_raw:=camera/image_sim</remapping></ros>
           <camera_name>camera</camera_name>
           <frame_name>camera_optical</frame_name>
         </plugin>

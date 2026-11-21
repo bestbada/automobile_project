@@ -10,8 +10,10 @@
       </camera>
   </gui>
 
+  <!-- EXPOSURE_K 0.35: 조명(ambient·light·햇빛조각 emissive)을 실제의 0.35배로 렌더링해 포화 방지.
+       camera_sim_node(자동노출 흉내)가 이득을 올려 camera/image_raw로 발행. 하늘·신호등 램프는 그대로 -->
   <scene>
-    <ambient>0.55 0.55 0.55 1</ambient>
+    <ambient>0.1925 0.1925 0.1925 1</ambient>
     <background>0.7 0.8 0.92 1</background>
     <shadows>1</shadows>
   </scene>
@@ -1557,7 +1559,7 @@
     <model name="sun_patch_0"><static>true</static><pose>0 0 -5 0 0 0</pose>
       <link name="link"><visual name="visual"><cast_shadows>false</cast_shadows><transparency>0.5</transparency>
         <geometry><box><size>1 1 0.001</size></box></geometry>
-        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><emissive>1 0.97 0.9 1</emissive></material>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><emissive>0.35 0.3395 0.315 1</emissive></material>
       </visual></link>
     </model>
     <!-- 창문 햇빛 조각: 바닥 위 밝은 반투명 판(조명 spot은 이 바닥에 안 비쳐서 대체). 기본은 바닥 아래 숨김,
@@ -1565,7 +1567,7 @@
     <model name="sun_patch_1"><static>true</static><pose>0 0 -5 0 0 0</pose>
       <link name="link"><visual name="visual"><cast_shadows>false</cast_shadows><transparency>0.5</transparency>
         <geometry><box><size>1 1 0.001</size></box></geometry>
-        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><emissive>1 0.97 0.9 1</emissive></material>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><emissive>0.35 0.3395 0.315 1</emissive></material>
       </visual></link>
     </model>
     <!-- 창문 햇빛 조각: 바닥 위 밝은 반투명 판(조명 spot은 이 바닥에 안 비쳐서 대체). 기본은 바닥 아래 숨김,
@@ -1573,126 +1575,126 @@
     <model name="sun_patch_2"><static>true</static><pose>0 0 -5 0 0 0</pose>
       <link name="link"><visual name="visual"><cast_shadows>false</cast_shadows><transparency>0.5</transparency>
         <geometry><box><size>1 1 0.001</size></box></geometry>
-        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><emissive>1 0.97 0.9 1</emissive></material>
+        <material><ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><emissive>0.35 0.3395 0.315 1</emissive></material>
       </visual></link>
     </model>
     <light name="sun_light" type="directional">
       <cast_shadows>true</cast_shadows>
       <pose>0 0 20 0 0 0</pose>
-      <diffuse>0.9 0.873 0.81 1</diffuse>
-      <specular>0.27 0.27 0.27 1</specular>
+      <diffuse>0.315 0.3055 0.2835 1</diffuse>
+      <specular>0.0945 0.0945 0.0945 1</specular>
       <direction>-0.3 -0.2 -0.93</direction>
     </light>
     <light name="ceiling_0" type="point">
       <cast_shadows>false</cast_shadows>
       <pose>-8.0 -10.0 6.6 0 0 0</pose>
-      <diffuse>0.3 0.3 0.285 1</diffuse>
-      <specular>0.05 0.05 0.05 1</specular>
+      <diffuse>0.105 0.105 0.09975 1</diffuse>
+      <specular>0.0175 0.0175 0.0175 1</specular>
       <attenuation><range>14</range><constant>0.6</constant><linear>0.05</linear><quadratic>0.01</quadratic></attenuation>
     </light>
     <light name="ceiling_1" type="point">
       <cast_shadows>false</cast_shadows>
       <pose>-8.0 -3.4 6.6 0 0 0</pose>
-      <diffuse>0.3 0.3 0.285 1</diffuse>
-      <specular>0.05 0.05 0.05 1</specular>
+      <diffuse>0.105 0.105 0.09975 1</diffuse>
+      <specular>0.0175 0.0175 0.0175 1</specular>
       <attenuation><range>14</range><constant>0.6</constant><linear>0.05</linear><quadratic>0.01</quadratic></attenuation>
     </light>
     <light name="ceiling_2" type="point">
       <cast_shadows>false</cast_shadows>
       <pose>-8.0 3.4 6.6 0 0 0</pose>
-      <diffuse>0.3 0.3 0.285 1</diffuse>
-      <specular>0.05 0.05 0.05 1</specular>
+      <diffuse>0.105 0.105 0.09975 1</diffuse>
+      <specular>0.0175 0.0175 0.0175 1</specular>
       <attenuation><range>14</range><constant>0.6</constant><linear>0.05</linear><quadratic>0.01</quadratic></attenuation>
     </light>
     <light name="ceiling_3" type="point">
       <cast_shadows>false</cast_shadows>
       <pose>-8.0 10.0 6.6 0 0 0</pose>
-      <diffuse>0.3 0.3 0.285 1</diffuse>
-      <specular>0.05 0.05 0.05 1</specular>
+      <diffuse>0.105 0.105 0.09975 1</diffuse>
+      <specular>0.0175 0.0175 0.0175 1</specular>
       <attenuation><range>14</range><constant>0.6</constant><linear>0.05</linear><quadratic>0.01</quadratic></attenuation>
     </light>
     <light name="ceiling_4" type="point">
       <cast_shadows>false</cast_shadows>
       <pose>-2.7 -10.0 6.6 0 0 0</pose>
-      <diffuse>0.3 0.3 0.285 1</diffuse>
-      <specular>0.05 0.05 0.05 1</specular>
+      <diffuse>0.105 0.105 0.09975 1</diffuse>
+      <specular>0.0175 0.0175 0.0175 1</specular>
       <attenuation><range>14</range><constant>0.6</constant><linear>0.05</linear><quadratic>0.01</quadratic></attenuation>
     </light>
     <light name="ceiling_5" type="point">
       <cast_shadows>false</cast_shadows>
       <pose>-2.7 -3.4 6.6 0 0 0</pose>
-      <diffuse>0.3 0.3 0.285 1</diffuse>
-      <specular>0.05 0.05 0.05 1</specular>
+      <diffuse>0.105 0.105 0.09975 1</diffuse>
+      <specular>0.0175 0.0175 0.0175 1</specular>
       <attenuation><range>14</range><constant>0.6</constant><linear>0.05</linear><quadratic>0.01</quadratic></attenuation>
     </light>
     <light name="ceiling_6" type="point">
       <cast_shadows>false</cast_shadows>
       <pose>-2.7 3.4 6.6 0 0 0</pose>
-      <diffuse>0.3 0.3 0.285 1</diffuse>
-      <specular>0.05 0.05 0.05 1</specular>
+      <diffuse>0.105 0.105 0.09975 1</diffuse>
+      <specular>0.0175 0.0175 0.0175 1</specular>
       <attenuation><range>14</range><constant>0.6</constant><linear>0.05</linear><quadratic>0.01</quadratic></attenuation>
     </light>
     <light name="ceiling_7" type="point">
       <cast_shadows>false</cast_shadows>
       <pose>-2.7 10.0 6.6 0 0 0</pose>
-      <diffuse>0.3 0.3 0.285 1</diffuse>
-      <specular>0.05 0.05 0.05 1</specular>
+      <diffuse>0.105 0.105 0.09975 1</diffuse>
+      <specular>0.0175 0.0175 0.0175 1</specular>
       <attenuation><range>14</range><constant>0.6</constant><linear>0.05</linear><quadratic>0.01</quadratic></attenuation>
     </light>
     <light name="ceiling_8" type="point">
       <cast_shadows>false</cast_shadows>
       <pose>2.7 -10.0 6.6 0 0 0</pose>
-      <diffuse>0.3 0.3 0.285 1</diffuse>
-      <specular>0.05 0.05 0.05 1</specular>
+      <diffuse>0.105 0.105 0.09975 1</diffuse>
+      <specular>0.0175 0.0175 0.0175 1</specular>
       <attenuation><range>14</range><constant>0.6</constant><linear>0.05</linear><quadratic>0.01</quadratic></attenuation>
     </light>
     <light name="ceiling_9" type="point">
       <cast_shadows>false</cast_shadows>
       <pose>2.7 -3.4 6.6 0 0 0</pose>
-      <diffuse>0.3 0.3 0.285 1</diffuse>
-      <specular>0.05 0.05 0.05 1</specular>
+      <diffuse>0.105 0.105 0.09975 1</diffuse>
+      <specular>0.0175 0.0175 0.0175 1</specular>
       <attenuation><range>14</range><constant>0.6</constant><linear>0.05</linear><quadratic>0.01</quadratic></attenuation>
     </light>
     <light name="ceiling_10" type="point">
       <cast_shadows>false</cast_shadows>
       <pose>2.7 3.4 6.6 0 0 0</pose>
-      <diffuse>0.3 0.3 0.285 1</diffuse>
-      <specular>0.05 0.05 0.05 1</specular>
+      <diffuse>0.105 0.105 0.09975 1</diffuse>
+      <specular>0.0175 0.0175 0.0175 1</specular>
       <attenuation><range>14</range><constant>0.6</constant><linear>0.05</linear><quadratic>0.01</quadratic></attenuation>
     </light>
     <light name="ceiling_11" type="point">
       <cast_shadows>false</cast_shadows>
       <pose>2.7 10.0 6.6 0 0 0</pose>
-      <diffuse>0.3 0.3 0.285 1</diffuse>
-      <specular>0.05 0.05 0.05 1</specular>
+      <diffuse>0.105 0.105 0.09975 1</diffuse>
+      <specular>0.0175 0.0175 0.0175 1</specular>
       <attenuation><range>14</range><constant>0.6</constant><linear>0.05</linear><quadratic>0.01</quadratic></attenuation>
     </light>
     <light name="ceiling_12" type="point">
       <cast_shadows>false</cast_shadows>
       <pose>8.0 -10.0 6.6 0 0 0</pose>
-      <diffuse>0.3 0.3 0.285 1</diffuse>
-      <specular>0.05 0.05 0.05 1</specular>
+      <diffuse>0.105 0.105 0.09975 1</diffuse>
+      <specular>0.0175 0.0175 0.0175 1</specular>
       <attenuation><range>14</range><constant>0.6</constant><linear>0.05</linear><quadratic>0.01</quadratic></attenuation>
     </light>
     <light name="ceiling_13" type="point">
       <cast_shadows>false</cast_shadows>
       <pose>8.0 -3.4 6.6 0 0 0</pose>
-      <diffuse>0.3 0.3 0.285 1</diffuse>
-      <specular>0.05 0.05 0.05 1</specular>
+      <diffuse>0.105 0.105 0.09975 1</diffuse>
+      <specular>0.0175 0.0175 0.0175 1</specular>
       <attenuation><range>14</range><constant>0.6</constant><linear>0.05</linear><quadratic>0.01</quadratic></attenuation>
     </light>
     <light name="ceiling_14" type="point">
       <cast_shadows>false</cast_shadows>
       <pose>8.0 3.4 6.6 0 0 0</pose>
-      <diffuse>0.3 0.3 0.285 1</diffuse>
-      <specular>0.05 0.05 0.05 1</specular>
+      <diffuse>0.105 0.105 0.09975 1</diffuse>
+      <specular>0.0175 0.0175 0.0175 1</specular>
       <attenuation><range>14</range><constant>0.6</constant><linear>0.05</linear><quadratic>0.01</quadratic></attenuation>
     </light>
     <light name="ceiling_15" type="point">
       <cast_shadows>false</cast_shadows>
       <pose>8.0 10.0 6.6 0 0 0</pose>
-      <diffuse>0.3 0.3 0.285 1</diffuse>
-      <specular>0.05 0.05 0.05 1</specular>
+      <diffuse>0.105 0.105 0.09975 1</diffuse>
+      <specular>0.0175 0.0175 0.0175 1</specular>
       <attenuation><range>14</range><constant>0.6</constant><linear>0.05</linear><quadratic>0.01</quadratic></attenuation>
     </light>
     

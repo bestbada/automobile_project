@@ -8,6 +8,7 @@
   Gazebo에서 출발선과 차로 중앙에 맞는지 보고 SPAWN 값을 고칠 것.
 """
 import os
+import re
 import subprocess
 from launch import LaunchDescription
 from launch.actions import ExecuteProcess, TimerAction, DeclareLaunchArgument, OpaqueFunction
@@ -34,7 +35,16 @@ def launch_setup(context):
                             '-Y', str(SPAWN['yaw'])]),
         ]),
         Node(package='simulation_pkg', executable='sim_simulation_sender_node', output='screen'),
+        # 시뮬 전용: Gazebo camera/image_sim → 역광·자동노출 → camera/image_raw(실차 카메라와 같은 토픽)
+        Node(package='simulation_pkg', executable='camera_sim_node', output='screen', parameters=[sun_params(world_file)]),
     ] + viewer(context)
+
+
+def sun_params(world_file):
+    """월드의 sun_light 방향·색 → camera_sim_node 역광 초기값"""
+    m = re.search(r'<light name="sun_light".*?</light>', open(world_file).read(), re.S)
+    v = lambda t: [float(x) for x in re.search(f'<{t}>([^<]+)</{t}>', m.group(0)).group(1).split()[:3]]
+    return dict(sun_dir=v('direction'), sun_diffuse=v('diffuse'))
 
 
 # 카메라 창(전방/후방/위성): 주최 측 런치가 rqt로 카메라를 보여주던 것과 같은 역할. viewer:=false 로 끔

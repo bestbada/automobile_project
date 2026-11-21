@@ -32,6 +32,7 @@ setup(
         'console_scripts': [
             'load_ego_car_node = simulation_pkg.lib.load_ego_car_node:main',
             'sim_simulation_sender_node = simulation_pkg.simulation_sender_node:main',
+            'camera_sim_node = simulation_pkg.camera_sim_node:main',
         ],
     },
 )

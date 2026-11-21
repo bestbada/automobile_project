@@ -1,6 +1,8 @@
 """영상처리 차선 인식 노드(YOLO 미사용): camera/image_raw → 2차선 중심 곡선 → path_planning_result.
 motion_planner_node가 그대로 쓰도록 경로를 lane_info_extractor ROI 픽셀 좌표로 바꿔 발행한다.
-검출 실패 프레임은 발행하지 않음(motion_planner는 직전 경로 유지)."""
+검출 실패 프레임은 직전 경로를 차량 이동(명령값 추정)만큼 옮긴 예측을 발행(최대 약 1.5초, LaneDetector.miss 15).
+motion_planner는 경로가 안 오면 직전 경로를 차량 좌표 그대로 유지해서, 급커브에서 선이 시야 밖으로 나가면
+조향이 한쪽에 고정돼 이탈했음(track_real 0.6바퀴 지점)."""
 import math
 import rclpy
 from rclpy.node import Node
@@ -8,7 +10,7 @@ from rclpy.qos import QoSProfile, qos_profile_sensor_data
 from cv_bridge import CvBridge
 from sensor_msgs.msg import Image
 from interfaces_pkg.msg import PathPlanningResult, MotionCommand
-from .lane_cv import LaneDetector
+from .lane_cv import LaneDetector, IW, IH
 
 # 명령값 → 차량 이동 추정(검출기 예측용). 시뮬: 속도 cmd/255*5 m/s, 조향 cmd ±7 ↔ ±0.45rad, 음수=좌
 WHEELBASE, MAX_STEER, STEER_SIGN, CMD_TO_MPS = 0.59, 0.45, -1, 5.0 / 255
@@ -36,8 +38,14 @@ class LaneCvNode(Node):
         dt = 0.0 if self.last_t is None else min(max(t - self.last_t, 0.0), 0.5); self.last_t = t
         v = (self.cmd.left_speed + self.cmd.right_speed) / 2 * CMD_TO_MPS * self.speed_scale
         delta = STEER_SIGN * self.cmd.steering / 7 * MAX_STEER
-        ctr = self.det.detect(self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8'),
-                              dx=v * dt, dyaw=v * math.tan(delta) / WHEELBASE * dt)
+        img = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
+        if img.shape[:2] != (IH, IW):   # BEV 변환은 시뮬 카메라(1024x576, model.sdf) 기준 → 다른 해상도면 결과가 틀림
+            self.get_logger().error(f'카메라 해상도 {img.shape[1]}x{img.shape[0]} != {IW}x{IH}: lane_cv 카메라 상수 확인 필요',
+                                    throttle_duration_sec=2.0)
+            return
+        ctr = self.det.detect(img, dx=v * dt, dyaw=v * math.tan(delta) / WHEELBASE * dt)
+        if ctr is None:
+            ctr = self.det.prev   # 검출 실패: 오도메트리로 옮긴 직전 경로(1.5초 넘으면 None)
         if ctr is None:
             return
         out = PathPlanningResult()
