@@ -9,7 +9,7 @@ from scipy.interpolate import CubicSpline
 #---------------Variable Setting---------------
 SUB_LANE_TOPIC_NAME = "yolov8_lane_info"  # lane_info_extractor 노드에서 퍼블리시하는 타겟 지점 토픽
 PUB_TOPIC_NAME = "path_planning_result"   # 경로 계획 결과 퍼블리시 토픽
-CAR_CENTER_POINT = (320, 179) # 이미지 상에서 차량 앞 범퍼의 중심이 위치한 픽셀 좌표
+CAR_CENTER_POINT = (512, 275) # 이미지 상에서 차량 앞 범퍼의 중심이 위치한 픽셀 좌표 (CLE53 ROI 1024x276 기준)
 
 #----------------------------------------------
 class PathPlannerNode(Node):
@@ -40,8 +40,8 @@ class PathPlannerNode(Node):
 
     def lane_callback(self, msg: LaneInfo):
         
-        # 타겟 지점 받아오기
-        self.target_points = msg.target_points
+        # 타겟 지점 받아오기. target_x==0은 차선 중심 검출 실패값이라 버림(남은 점이 3개 미만이면 이전 경로 유지)
+        self.target_points = [tp for tp in msg.target_points if tp.target_x != 0]
         
         # 타겟 지점이 3개 이상 모이면 경로 계획 시작
         if len(self.target_points) >= 3:

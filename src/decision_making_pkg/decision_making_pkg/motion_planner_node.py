@@ -5,13 +5,39 @@ from rclpy.qos import QoSHistoryPolicy
 from rclpy.qos import QoSDurabilityPolicy
 from rclpy.qos import QoSReliabilityPolicy
 
+import math
 from interfaces_pkg.msg import PathPlanningResult, MotionCommand
-from .lib import decision_making_func_lib as DMFL
 
 #---------------Variable Setting---------------
 SUB_PATH_TOPIC_NAME = "path_planning_result"
 PUB_TOPIC_NAME = "topic_control_signal"
 
+
+# CLE53 기하 / BEV(lane_info_extractor) → 차량 좌표 변환
+WHEELBASE = 0.59          # 축간거리(m)
+MAX_STEER = 0.45          # 조향 명령 ±7 ↔ 바퀴 ±0.45rad
+STEER_SIGN = -1           # 명령 음수 = 좌회전 (simulation config driving STEERING=-1)
+CAM_X = 0.24              # 뒷바퀴축 → 카메라 전방 거리(m)
+BEV_FAR, BEV_NEAR, BEV_H = 2.5, 0.85, 576   # BEV 0행=카메라 앞 2.5m, 576행=0.85m (지면 선형)
+ROI_CUT = 300             # roi_rectangle_below cutting_idx
+PX_PER_M = 410 / 0.866    # BEV 차로폭 410px = 0.866m
+IMG_CX = 512
+
+
+def roi_to_vehicle(x_px, y_roi):
+    """ROI 픽셀 → 뒷바퀴축 기준 (전방 m, 좌측 m)"""
+    fwd = CAM_X + BEV_FAR - (y_roi + ROI_CUT) / BEV_H * (BEV_FAR - BEV_NEAR)
+    return fwd, (IMG_CX - x_px) / PX_PER_M
+
+
+def pure_pursuit_cmd(fwd, left):
+    """목표점(차량 좌표)으로 pure pursuit 조향 명령(-7~7)"""
+    ld = math.hypot(fwd, left)
+    delta = math.atan2(2 * WHEELBASE * left / ld, ld)   # sinα = left/ld
+    return int(max(-7, min(7, round(STEER_SIGN * delta / MAX_STEER * 7))))
+
+
+assert pure_pursuit_cmd(1.6, 0.0) == 0 and pure_pursuit_cmd(1.6, 0.3) < 0 and pure_pursuit_cmd(1.6, -0.3) > 0
 #----------------------------------------------
 
 # 모션 플랜 발행 주기 (초) - 소수점 필요 (int형은 반영되지 않음)
@@ -27,11 +53,12 @@ class MotionPlanningNode(Node):
         
         self.timer_period = self.declare_parameter('timer', TIMER).value
 
-        # 비례 조향 설정 (원본은 기울기 부호만 보는 ±7 bang-bang)
-        # steering_gain: 경로 기울기(도, DMFL 반환값) 1도당 조향 명령값. 0.3이면 약 23도에서 최대 조향 7
-        # speed: 좌/우 속도 명령(0~255). 원본 고정값 100 유지, 차량에 맞춰 실행 인자로 조정
-        self.steering_gain = self.declare_parameter('steering_gain', 0.3).value
+        # lookahead: 목표점까지 직선거리(m, 뒷바퀴축 기준)
+        # speed: 좌/우 속도 명령(0~255)
+        self.lookahead = self.declare_parameter('lookahead', 1.6).value
         self.speed = self.declare_parameter('speed', 100).value
+        # min_speed: 최대 조향(±7)일 때 속도. 조향량에 비례해 speed→min_speed로 감속(기본=speed, 감속 없음)
+        self.min_speed = self.declare_parameter('min_speed', self.speed).value
 
         # QoS 설정
         self.qos_profile = QoSProfile(
@@ -66,15 +93,17 @@ class MotionPlanningNode(Node):
         if self.path_data is None:
             self.steering_command = 0
         else:
-            target_slope = DMFL.calculate_slope_between_points(self.path_data[-10], self.path_data[-1])
-            
-            # 원본(bang-bang): 기울기 > 0 이면 7, < 0 이면 -7, 0 이면 0
-            # 비례 조향: 기울기에 비례해 조향하고 ±7(최대 조향)로 제한.
-            # 작은 편차에도 최대 조향하던 원본은 회전 반경이 작은 CLE53(축간 0.59m)에서 바로 차로를 이탈함
-            self.steering_command = int(max(-7, min(7, round(self.steering_gain * target_slope))))
+            # pure pursuit: 경로점 중 직선거리가 lookahead에 가장 가까운 점을 목표로 조향.
+            # (원본 기울기×gain 방식은 화면 맨 아래 고정점 근처 기울기를 써서 직선에서 진동, 커브에서 조향량 부족)
+            pts = [roi_to_vehicle(x, y) for x, y in self.path_data]
+            fwd, left = min(pts, key=lambda p: abs(math.hypot(*p) - self.lookahead))
+            self.steering_command = pure_pursuit_cmd(fwd, left)
 
-        self.left_speed_command = self.speed   # 속도 (255가 최대 속도)
-        self.right_speed_command = self.speed
+        # 경로가 아직 없으면(YOLO 콜드스타트) 정지
+        speed = 0 if self.path_data is None else round(
+            self.speed - (self.speed - self.min_speed) * abs(self.steering_command) / 7)
+        self.left_speed_command = speed   # 속도 (255가 최대 속도)
+        self.right_speed_command = speed
 
 
 

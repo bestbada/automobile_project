@@ -22,6 +22,7 @@ setup(
         'console_scripts': [
             'yolov8_node = camera_perception_pkg.yolov8_node:main',
             'lane_info_extractor_node = camera_perception_pkg.lane_info_extractor_node:main',
+            'lane_cv_node = camera_perception_pkg.lane_cv_node:main',
         ],
     },
 )
