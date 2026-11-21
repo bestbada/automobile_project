@@ -11,6 +11,9 @@ FX = IW / 2 / math.tan(HFOV / 2)
 RES = 0.01                                   # BEV 1px = 1cm
 X0, X1, Y0, Y1 = 0.80, 2.80, -1.60, 1.60     # BEV 범위(전방 0.8~2.8m, 좌우 ±1.6m)
 LANE_OFF = 0.435                             # 바깥 실선 중심 → 2차선 중심(트랙 텍스처 실측)
+START = 1.0                                  # 선 시작점 탐색 범위(BEV 아래에서 m): 근거리가 햇빛에 가려도 먼 선 사용
+# 2차 계수 상한: 중심선 최소 반경 약 1.17m(lane2_center.npy) → 가장 안쪽 선 반경 약 0.74m → a=1/(2R)≈0.68
+A_MAX = 0.7
 
 
 def _build_map():
@@ -62,7 +65,7 @@ def track_line(m, y_start, max_gap=0.35, win=0.06, start_tol=0.22):
     for r in range(H - 1, -1, -1):
         rw = dict(_runs(m[r], with_width=True)); runs = list(rw)
         if c is None:                                   # 시작점: 예상 위치 근처
-            if (H - 1 - r) * RES > 0.70: return None   # 시야 하한이 약 1.09m라 0.8~1.5m에서 시작점 탐색
+            if (H - 1 - r) * RES > START: return None   # 시야 하한이 약 1.09m라 0.8~(0.8+START)m에서 시작점 탐색
             cand = [u for u in runs if abs(u - col(y_start)) <= start_tol / RES]
             if cand: c = min(cand, key=lambda u: abs(u - col(y_start))); pts.append((r, c)); widths[r] = rw[c]
             continue
@@ -86,10 +89,10 @@ def track_line(m, y_start, max_gap=0.35, win=0.06, start_tol=0.22):
 
 
 def find_lines(m, max_gap=0.40):
-    """근거리(0.8~1.5m)에서 시작하는 모든 선을 추적. 반환: [(근거리 횡위치, 채움률, 점들)]
+    """근거리(0.8~1.8m, START)에서 시작하는 모든 선을 추적. 반환: [(근거리 횡위치, 채움률, 점들)]
     채움률 = 추적 구간 중 실제로 선이 있던 행 비율(실선 ≈1, 점선 ≈0.5)"""
     H = m.shape[0]; starts = []
-    for r in range(H - 1, H - 1 - int(0.70 / RES), -3):
+    for r in range(H - 1, H - 1 - int(START / RES), -3):
         for u in _runs(m[r]):
             y = Y1 - u * RES
             if all(abs(y - q) > 0.08 for q in starts): starts.append(y)
@@ -109,9 +112,14 @@ def find_lines(m, max_gap=0.40):
     return [l[:3] for l in lines]
 
 
-def offset_curve(pts, off):
-    """선 점들을 2차 다항식 y(x)로 맞춘 뒤 좌측 법선 방향으로 off(m) 평행이동. 근거리는 0.3m까지 연장"""
-    k = np.polyfit(pts[:, 0], pts[:, 1], 2 if len(pts) > 40 else 1)
+def offset_curve(pts, off, a=None):
+    """선 점들을 2차 다항식 y(x)로 맞춘 뒤 좌측 법선 방향으로 off(m) 평행이동. 근거리는 0.3m까지 연장.
+    a: 점이 적을 때(햇빛 포화 등으로 선이 짧게 보임) 쓸 2차 계수(직전 곡선에서). 없으면 직선 피팅"""
+    if len(pts) > 40: a = np.polyfit(pts[:, 0], pts[:, 1], 2)[0]
+    if a is None: k = np.polyfit(pts[:, 0], pts[:, 1], 1)
+    else:
+        a = float(np.clip(a, -A_MAX, A_MAX))   # 트랙보다 급한 곡률은 잡음(포화 경계·그림자 섞임)
+        k = np.r_[a, np.polyfit(pts[:, 0], pts[:, 1] - a * pts[:, 0] ** 2, 1)]
     xs = np.arange(0.3, pts[:, 0].max(), 0.02)
     ys = np.polyval(k, xs); s = np.polyval(np.polyder(k), xs); n = np.sqrt(1 + s * s)
     return np.stack([xs - off * s / n, ys + off / n], 1)
@@ -146,7 +154,9 @@ class LaneDetector:
             elif long_: pens = (0.05, 0.0, 0.05)
             else: pens = (0.05, 0.04, 0.08)
             kinds = list(zip((LANE_OFF, -LANE_OFF, -LANE_OFF - self.GAP), pens))
-            cands += [(offset_curve(t, off), pen) for off, pen in kinds]
+            # 짧은 선은 직전 차로 중심을 해당 선 위치로 옮긴 곡선의 곡률을 빌림
+            a = lambda off: None if self.prev is None else np.polyfit(*offset_curve(self.prev, -off).T, 2)[0]
+            cands += [(offset_curve(t, off, a(off)), pen) for off, pen in kinds]
         if not cands:
             self.miss += 1; return None
         c12 = lambda c: float(c[np.argmin(np.abs(c[:, 0] - 1.2)), 1])
